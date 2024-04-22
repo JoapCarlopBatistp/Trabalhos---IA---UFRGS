@@ -61,12 +61,12 @@ def fit(data, b, w, alpha, num_iterations):
     :param num_iterations: int - numero de épocas/iterações para executar a descida de gradiente
     :return: list,list - uma lista com os b e outra com os w obtidos ao longo da execução
     """
-    list_b = [b]
-    list_w = [w]
+    list_b = [b]                                                    #Lista que deve ser retornada de todos os b's 
+    list_w = [w]                                                    #Lista que deve ser retornada de todos os w's
     
-    for epoch in range(num_iterations):
-        w, b = step_gradient(b, w, data, alpha)
-        list_b.append(b)
-        list_w.append(w)
+    for epoch in range(num_iterations):                             #Itera num_interactions vezes
+        w, b = step_gradient(b, w, data, alpha)                     #Chama a função de gradiente descendente e atualiza b e w
+        list_b.append(b)                                            #Coloca o novo valor no final da lista de b's
+        list_w.append(w)                                            #Coloca o novo valor no final da lista de w's
         
-    return list_b, list_w
+    return list_b, list_w                                           #Retorna as duas listas

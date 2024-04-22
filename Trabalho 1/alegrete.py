@@ -27,7 +27,23 @@ def step_gradient(b, w, data, alpha):
     :param alpha: float - taxa de aprendizado (a.k.a. tamanho do passo)
     :return: float,float - os novos valores de b e w, respectivamente
     """
-    raise NotImplementedError  # substituir pelo seu codigo
+    x = data[:,0]                                                   #Primeira coluna do parâmetro "data" é separada (X)
+    y = data[:,1]                                                   #Segunda coluna do parâmetro "data" é separada (Y)
+    N = data.shape[0]                                               #Conta a quantidade de combinações (x, y) na matriz
+    partial_derivative_b = 0.0                                      #Derivada parcial em relação a B inicializada em 0
+    partial_derivative_w = 0.0                                      #Derivada parcial em relação a B inicializada em 0
+    
+    for i, j in zip(x,y):                                           #Itera por x e y sob os rótulos i e j
+        partial_derivative_b += -2*(j - (w*i + b))                  #Calcula a derivada parcial em relação a b para todos os x's e y's 
+        partial_derivative_w += -2*(j - (w*i + b))*i                #Calcula a derivada parcial em relação a w para todos os x's e y's
+        
+    partial_derivative_b = partial_derivative_b/(N)                 #Média das derivadas parciais em relação a b
+    partial_derivative_w = partial_derivative_w/(N)                 #Média das derivadas parciais em relação a w      
+    w = w - partial_derivative_w*alpha                              #Gradiente descendente (multiplicando a derivada parcial pela taxa de aprendizado alfa)
+    b = b - partial_derivative_b*alpha                              #Gradiente descendente (multiplicando a derivada parcial pela taxa de aprendizado alfa)
+    
+    return w, b
+    
 
 
 def fit(data, b, w, alpha, num_iterations):
@@ -46,4 +62,3 @@ def fit(data, b, w, alpha, num_iterations):
     :return: list,list - uma lista com os b e outra com os w obtidos ao longo da execução
     """
     raise NotImplementedError  # substituir pelo seu codigo
-

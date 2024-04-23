@@ -20,7 +20,8 @@ Curva encontrada: 0.890946459465156 * x - 5.0489020470416006 (o que não é tão
 Ademais, ao que parece, ao realizar a operação de normalização dos dados, a operação de gradiente descendente precisou de menos
 iterações para chegar em uma aproximação satisfatória da função
 
-Para fazer os testes com e sem a normalização, colocamos a linha de código que normaliza os dados separada no arquivo .ipynb, para que possa ser comentada a fim de testar os dois casos
+Para fazer os testes com e sem a normalização, colocamos a linha de código que normaliza os dados logo depois do carregamento
+do .csv no arquivo .ipynb, para que possa ser comentada a fim de testar os dois casos
 
 
 TENSORFLOW------------------------------------------------------------------------------------------------------

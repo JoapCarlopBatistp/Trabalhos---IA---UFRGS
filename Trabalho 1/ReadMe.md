@@ -14,14 +14,13 @@ A função depois das 1000 iterações retornou a reta --> 1.1593592447726748 * 
 Utilizando a normalização por meio da fórmula de mean normalization, implementada na função "feature_scaling" no arquivo 
 normalizacao.py, utilizando os mesmos b, w, alpha e num_interactions obtemos os seguintes dados:
 
-EQM = 0.02910787587042806  (o que faz sentido, considerando que este tipo de normalização visa reduzir o erro quadrático médio)
-Curva encontrada: 1.1030862263817092*x - 5.048902045365841 (o que não é tão distante do obtido sem normalização)
+EQM = 0.014992103975467614  (o que faz sentido, considerando que este tipo de normalização visa reduzir o erro quadrático médio)
+Curva encontrada: 0.890946459465156 * x - 5.0489020470416006 (o que não é tão distante do obtido sem normalização)
 
 Ademais, ao que parece, ao realizar a operação de normalização dos dados, a operação de gradiente descendente precisou de menos
 iterações para chegar em uma aproximação satisfatória da função
 
-Para fazer os testes com e sem a normalização, colocamos a linha de código que normaliza os dados separada, para que possa ser
-comentada a fim de testar os dois casos
+Para fazer os testes com e sem a normalização, colocamos a linha de código que normaliza os dados separada no arquivo .ipynb, para que possa ser comentada a fim de testar os dois casos
 
 
 TENSORFLOW------------------------------------------------------------------------------------------------------

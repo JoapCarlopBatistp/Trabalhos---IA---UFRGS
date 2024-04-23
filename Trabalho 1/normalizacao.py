@@ -24,6 +24,6 @@ def feature_scaling(data):
     y_average = np.divide(np.sum(y, axis=0), size)                        #Calcula o valor médio da coluna de y
     
     data[:,0] = np.divide(x - x_average, x_gap)                           #Implementa a função de mean normalization para x
-    data[:,1] = np.divide(y - y_average, x_gap)                           #Implementa a função de mean normalization para y
+    data[:,1] = np.divide(y - y_average, y_gap)                           #Implementa a função de mean normalization para y
     
     return data                                                           #Retorna os dados normalizados

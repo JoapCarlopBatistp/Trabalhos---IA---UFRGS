@@ -1,4 +1,44 @@
+#Arquivo feito para testar as funcionalidades até agora NÃO MANDAR PRO PROFESSOR!!
+
 import numpy as np
+
+
+from IPython.display import HTML
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+import alegrete
+
+def feature_scaling(data):
+    """
+    Retorna os dados de "data" normalizados
+    Utilizando "mean normalization":
+    X' = (x - x_medio)/(x_maximo - x_minimo)
+    """
+    
+    x = data[:,0]                                                         #Primeira coluna do parâmetro "data" é separada (X)
+    y = data[:,1]                                                         #Segunda coluna do parâmetro "data" é separada (Y)
+    size = data.shape[0]                                                  #Conta o tamanho de x e y
+    
+    x_max = np.max(x)                                                     #Valor máximo do banco de x
+    y_max = np.max(y)                                                     #Valor máximo do banco de y
+    
+    x_min = np.min(x)                                                     #Valor mínimo do banco de x
+    y_min = np.min(y)                                                     #Valor mínimo do banco de y
+    
+    x_gap = x_max - x_min                                                 #Calcula a diferença x_max - x_min
+    y_gap = y_max - y_min                                                 #Calcula a diferença y_max - y_min
+    
+    x_average = np.divide(np.sum(x, axis=0), size)                        #Calcula o valor médio da coluna de x
+    y_average = np.divide(np.sum(y, axis=0), size)                        #Calcula o valor médio da coluna de y
+    
+    data[:,0] = np.divide(x - x_average, x_gap)                           #Implementa a função de mean normalization para x
+    data[:,1] = np.divide(y - y_average, x_gap)                           #Implementa a função de mean normalization para y
+    
+    return data                                                           #Retorna os dados normalizados
+
+
 
 def compute_mse(b, w, data):
     """
@@ -70,3 +110,69 @@ def fit(data, b, w, alpha, num_iterations):
         
     return list_b, list_w                                           #Retorna as duas listas
 
+
+# dataset ficticio -- troque para carregar o alegrete.csv
+f = open("alegrete.csv", 'rb')
+dataset = np.loadtxt(f, delimiter=",", dtype=float)
+print(dataset)
+f.close
+
+dataset = feature_scaling(dataset)       #!!!Ian, se quiser testar sem a normalização comenta essa linha de código e roda o código
+print(dataset)
+
+#Gráfico dos dados
+plt.figure(figsize=(6, 2))
+plt.scatter(dataset[:,0], dataset[:,1])
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Dados ficticios')
+plt.show()
+
+b_history, w_history = alegrete.fit(
+    dataset, b=-3, w=1,
+    alpha=0.01, num_iterations=1000
+)
+
+# valores finais de theta0 e theta1
+final_b, final_w = b_history[-1], w_history[-1]
+
+mse_list = [alegrete.compute_mse(b, w, dataset) for b, w in zip(b_history, w_history)]
+print(f"EQM final: {mse_list[-1]}")
+
+
+plt.plot(mse_list)
+plt.xlabel('Epoca/iteracao')
+plt.ylabel('EQM')
+plt.show()
+
+#Imprimir parâmetros otimizados
+print (f'Curva encontrada: {final_w}*x + {final_b}')
+
+#plota os dados
+plt.figure(figsize=(4, 2))
+plt.scatter(dataset[:,0], dataset[:,1])
+
+# plota a curva de ajuste
+pred = final_w*dataset[:,0] + final_b
+plt.plot(dataset[:,0], pred, c='r')
+plt.show()
+
+fig = plt.figure(figsize=(4, 2))
+ax = fig.add_subplot(111)
+
+# conjunto de dados
+ax.scatter(dataset[:,0], dataset[:,1])
+
+# linha com os valores iniciais dos parametros
+pred = w_history[0]*dataset[:,0] + b_history[0]
+line, = ax.plot(dataset[:,0], pred, '-',c='r')
+
+# funcao que atualiza a linha a cada passo
+def animate(i):
+    pred = w_history[i] * dataset[:,0] + b_history[i]
+    line.set_ydata(pred)
+    return line,
+
+# mude interval para trocar a velocidade da animacao
+ani = animation.FuncAnimation(fig, animate, frames=len(b_history), interval=20, save_count=50)
+HTML(ani.to_jshtml())

@@ -129,7 +129,7 @@ plt.title('Dados ficticios')
 plt.show()
 
 b_history, w_history = alegrete.fit(
-    dataset, b=-3, w=1,
+    dataset, b=1, w=0.82,
     alpha=0.01, num_iterations=1000
 )
 

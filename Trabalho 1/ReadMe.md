@@ -54,5 +54,3 @@ Como o treino das redes estava a restrito a 10 épocas, redes menores, mais rapi
 A redução do tamanho das imagems com MaxPooling gera uma perda muito grande de informação, mas é necessário para garantir o treino em tempo adequado.
 Devido à pequena quantidade de dados, especialmente no datacet cifar100, que contem somente 600 imagens de cada classe, cria situações frequentes de Overfitting.
 Isso poderia ser remediado por técnicas de aumento de dados, como rotação e translação das imagens já obtidas.
-
-//Parte do Ian

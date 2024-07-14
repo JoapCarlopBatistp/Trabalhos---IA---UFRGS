@@ -44,6 +44,20 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
+        prox = util.Counter()                                                   #Dict temporario para valores pré atualização da mdp
+        for i in range(0, self.iterations):                                     #Para cada iteração
+            for state in mdp.getStates():                                       #Para cada estado
+                values = []                                                     #Dict de valores computados
+                
+                if self.mdp.isTerminal(state):                                  #Se está em estado terminal
+                    values.append(0)                                            #Adiciona 0 no final do dict
+                   
+                for act in mdp.getPossibleActions(state):                       #Para cada ação
+                    values.append(self.computeQValueFromValues(state, act))     #Dá append no valor computado na função computeQValueFromValues
+                
+                prox[state] = max(values)                                       #Prox do estado correspondente é substituido pelo maior valor presente no dict de valores
+
+            self.values = prox.copy()                                           #Valor de prox é copiado em values
 
 
     def getValue(self, state):
@@ -58,7 +72,14 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        transAndProbs = self.mdp.getTransitionStatesAndProbs(state,action)       #Probabilidades de transição e estados de transição
+        result = []                                                              #Dict para os valores da função de cálculo do Q valor
+        
+        for trans in transAndProbs:
+            result.append(trans[1] * (self.mdp.getReward(state,action,trans[0]) + self.discount * self.values[trans[0]]))
+                                     #Recompensa imediada + fator de desconto * valores 
+        return sum(result)
+        
 
     def computeActionFromValues(self, state):
         """
@@ -70,7 +91,22 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        possibleActions = self.mdp.getPossibleActions(state)
+        next = None
+        
+        if possibleActions is False:                            #Caso o dict esteja vazio (i.e. nao existem ações posiveis)
+            return next                                         #Retorna o valor de next (inicialmente == None)
+        
+        bestValue = float('-inf')                               #Inicializa o melhor valor como -infinito
+        
+        for act in possibleActions:                             #Para cada ação possivel no estado
+            value = self.computeQValueFromValues(state,act)     #Encontra o valor da ação
+            
+            if value > bestValue:                               #Se esse valor for maior que o melhor valor já encontrado (inicia com -infinito)
+                bestValue = value                               #Troca o melhor valor pelo atual
+                next = act                                      #Troca a próxima ação para a atual
+        
+        return next                                             #Retorna a ação com melhor valor
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)

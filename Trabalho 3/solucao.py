@@ -1,11 +1,27 @@
+from __future__ import annotations
+from asyncio.windows_events import NULL
 from typing import Iterable, Set, Tuple
+from copy import deepcopy
 from queue import PriorityQueue
+
+class Coord:
+    x = -1
+    y = -1
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 class Nodo:
     """
     Implemente a classe Nodo com os atributos descritos na funcao init
     """
-    def __init__(self, estado:str, pai, acao:str, custo:int):
+    estado = "12345678_"
+    pai = NULL
+    acao = NULL
+    custo = -1
+    children = set()
+
+    def __init__(self, estado:str, pai:Nodo, acao:str, custo:int):
         """
         Inicializa o nodo com os atributos recebidos
         :param estado:str, representacao do estado do 8-puzzle
@@ -18,8 +34,45 @@ class Nodo:
         self.pai = pai
         self.acao = acao
         self.custo = custo
+    def __lt__(self, other):
+        return self.estado < other.estado
 
 
+objective = "12345678_"
+
+def stringToSquare(estado:str):
+    a = estado[0]
+    b = estado[1]
+    c = estado[2]
+    d = estado[3]
+    e = estado[4]
+    f = estado[5]
+    g = estado[6]
+    h = estado[7]
+    i = estado[8]
+    square = [[a, b, c], [d, e, f], [g, h, i]]
+    return square
+
+def squareToString(square:list)->str:
+    estado = ""
+    for row in square:
+        for char in row:
+            estado += char
+    return estado
+
+
+def swap(square:list, a:Coord, b:Coord)->list:
+    
+    new_square = deepcopy(square)
+    achar = square[a.y][a.x]
+    bchar = square[b.y][b.x]
+    new_square[a.y][a.x] = bchar
+    new_square[b.y][b.x] = achar
+
+    #possible inneficiency FIX
+    return deepcopy(new_square)
+
+    
 def sucessor(estado:str)->Set[Tuple[str,str]]:
     """
     Recebe um estado (string) e retorna um conjunto de tuplas (ação,estado atingido)
@@ -29,27 +82,70 @@ def sucessor(estado:str)->Set[Tuple[str,str]]:
     :return:
     """
     # substituir a linha abaixo pelo seu codigo
-    estados = []
-    vazio = estado.find('_')
-    novoEstado: str
-    if vazio - 4 > 0:
-        novoEstado = estado
-        novoEstado = novoEstado[0:(vazio-4)] + novoEstado[vazio] + novoEstado[(vazio-4)+1:vazio] + novoEstado[vazio - 4] + novoEstado[vazio+1:]
-        estados.append(tuple('abaixo',novoEstado))
-    if vazio + 4 < 8:
-        novoEstado = estado
-        novoEstado = novoEstado[0:(vazio+4)] + novoEstado[vazio] + novoEstado[(vazio+4)+1:vazio] + novoEstado[vazio + 4] + novoEstado[vazio+1:]
-        estados.append(tuple('acima',novoEstado))
-    if (vazio != 0 and vazio != 3 and vazio != 6):
-        novoEstado = estado
-        novoEstado = novoEstado[0:(vazio-1)] + novoEstado[vazio] + novoEstado[(vazio-1)+1:vazio] + novoEstado[vazio - 1] + novoEstado[vazio+1:]
-        estados.append(tuple('direita',novoEstado))
-    if (vazio != 2 and vazio != 5 and vazio != 8):
-        novoEstado = estado
-        novoEstado = novoEstado[0:(vazio+1)] + novoEstado[vazio] + novoEstado[(vazio+1)+1:vazio] + novoEstado[vazio + 1] + novoEstado[vazio+1:]
-        estados.append(tuple('esquerda',novoEstado))
-        
-    return estados
+
+    sucessores = set()
+    square = stringToSquare(estado)
+    coord = getBlankCoords(square)
+    #print(estado)
+    #print(square)
+    x = coord.x
+    y = coord.y
+    
+    #print(x)
+    #print(y)
+    if x != 0:
+        #Can move left
+        move = ("esquerda", squareToString(moveLeft(square, coord)))
+        sucessores.add(move)
+    if x != 2:
+        #Can move right
+        move = ("direita", squareToString(moveRight(square, coord)))
+        sucessores.add(move)
+    if y != 0:
+        #Can move up
+        move = ("acima", squareToString(moveUp(square, coord)))
+        sucessores.add(move)
+    if y != 2:
+        #Can move down
+        move = ("abaixo", squareToString(moveDown(square, coord)))
+        sucessores.add(move)
+    return sucessores
+
+    
+def moveLeft(square:list, a:Coord)->list:
+    b = Coord(a.x - 1, a.y)
+    new_square = swap(square, a, b)
+    return new_square
+
+def moveRight(square:list, a:Coord)->list:
+    b = Coord(a.x + 1, a.y)
+    new_square = swap(square, a, b)
+    return new_square
+
+def moveUp(square:list, a:Coord)->list:
+    b = Coord(a.x, a.y - 1)
+    new_square = swap(square, a, b)
+    return new_square
+
+def moveDown(square:list, a:Coord)->list:
+    #print("move down")
+    #print(square)
+    b = Coord(a.x, a.y + 1)
+    new_square = swap(square, a, b)
+
+    #print(str(a.x) + str(a.y))
+    #print(str(b.x) + str(b.y))
+    #print(new_square)
+
+    return new_square
+
+def getBlankCoords(square:list)->Coord:
+    for i in range(3):
+        for j in range(3):
+            if(square[j][i] == '_'):
+                return Coord(i,j)
+    
+
 
 
 def expande(nodo:Nodo)->Set[Nodo]:
@@ -60,14 +156,16 @@ def expande(nodo:Nodo)->Set[Nodo]:
     :return:
     """
     # substituir a linha abaixo pelo seu codigo
-    nodos = []
-    custo = Nodo.custo + 1
-    estados = sucessor(Nodo.estado)
-    for iteration in estados:
-        acoesEestados = estados[iteration]
-        nodos.append(Nodo(acoesEestados[1], Nodo, acoesEestados[0], custo))
-    return nodos
-
+    children = set()
+    estado = nodo.estado
+    successors = sucessor(estado)
+    for s in successors:
+        move = s[0]
+        next_state = s[1]
+        child = Nodo(next_state, nodo, move, nodo.custo + 1)
+        nodo.children.add(child)
+        children.add(child)
+    return children
 
 def astar_hamming(estado:str)->list[str]:
     """
@@ -79,20 +177,80 @@ def astar_hamming(estado:str)->list[str]:
     :return:
     """
     # substituir a linha abaixo pelo seu codigo
-    NodosVisitados = []
-    filaDePrioridade = PriorityQueue()
-    filaDePrioridade.put(0, estado)
-    while filaDePrioridade:
-        if filaDePrioridade == None:
-            return None
-        v = filaDePrioridade.get()
-        if v == "12345678_":
-            return (None)#mudar daqui a pouco
-        if v not in NodosVisitados:
-            NodosVisitados.append(v)
-            filaDePrioridade.put()
+
+    iterations = 0
+
+    initial = Nodo(estado, NULL, NULL, 0)
+
+    explorados = set()
+    fronteira = PriorityQueue()
+    fronteira.put((0,initial))
+    while(True):
+        iterations += 1
+        #if((iterations % 1000) == 0):
+            #print("Size explorados")
+            #print(len(explorados))
+            #print("Size fronteira")
+            #print(fronteira.qsize())
+        if(fronteira.empty()):
+            break
+        v = getBest(fronteira) 
+        #print(v.pathCost)
+        if(isObjective(v)):
+            return path(v)
+        if(notExplored(v.estado, explorados)):
+            explorados.add(v.estado)
+            
+            neighborns = expande(v)
+            for neighborn in neighborns:
+                if notExplored(neighborn.estado, explorados):
+                    #print(type(neighborn))
+                    fronteira.put((neighborn.custo + hamming_heuristic(neighborn), neighborn))
+                    
+
+def notExplored(estado:str, explorados:Set[str])->bool:
+
+
+    return not estado in explorados
+
+    for nodo in explorados:
+        if(nodo.estado == estado):
+
+            return False
+    return True
+
+def isObjective(nodo:Nodo)->bool:
+    estado = nodo.estado
+
+    return estado == objective
+
+def getBest(queue:PriorityQueue)->Nodo:
+    return queue.get()[1]
+
+        
+def path(nodo:Nodo)->str:
+    node = nodo
+    action_list = []
+
+    while(node.pai != NULL):
+        action_list.insert(0, node.acao)
+        node = node.pai
+    return action_list
     
-    raise NotImplementedError
+
+
+
+   
+   
+
+def hamming_heuristic(nodo:Nodo)->int:
+    estado = nodo.estado
+    distance = 0
+    for i in range(len(estado)):
+        if((estado[i] != objective[i]) and (estado[i] != '_')):
+            distance += 1
+
+    return distance
 
 
 def astar_manhattan(estado:str)->list[str]:
@@ -105,8 +263,61 @@ def astar_manhattan(estado:str)->list[str]:
     :return:
     """
     # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    iterations = 0
 
+    initial = Nodo(estado, NULL, NULL, 0)
+
+    explorados = set()
+    fronteira = PriorityQueue()
+    fronteira.put((0,initial))
+    while(True):
+        iterations += 1
+
+        if(fronteira.empty()):
+            break
+        v = getBest(fronteira) 
+        #print(v.pathCost)
+        if(isObjective(v)):
+            return path(v)
+        if(notExplored(v.estado, explorados)):
+            explorados.add(v.estado)
+            
+            neighborns = expande(v)
+            for neighborn in neighborns:
+                if notExplored(neighborn.estado, explorados):
+                    #print(type(neighborn))
+                    fronteira.put((neighborn.custo + manhattan_heuristic(neighborn), neighborn))
+
+def manhattan_heuristic(nodo:Nodo)->int:
+    distance = 0
+    estado = nodo.estado
+    square = stringToSquare(estado)
+
+    for row in range(3):
+        for col in range(3):
+            distance += single_distance(square[row][col], row, col)
+    return distance
+
+
+def single_distance(piece:str, row:int, col:int)->int:
+
+    targetCoord = find(piece, stringToSquare(objective))
+
+    target_col = targetCoord.x
+    target_row = targetCoord.y
+
+    distance = abs(row - target_row) + abs(col - target_col)
+
+    return distance
+
+def find(piece:str, square:list)->Coord:
+
+    for row in range(3):
+        for col in range(3):
+            if square[row][col] == piece:
+                return Coord(col,row)
+
+    return 
 #opcional,extra
 def bfs(estado:str)->list[str]:
     """
@@ -118,7 +329,27 @@ def bfs(estado:str)->list[str]:
     :return:
     """
     # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    initial = Nodo(estado, NULL, NULL, 0)
+
+    explorados = set()
+    fronteira = []
+    fronteira.append(initial)
+    while(True):
+        
+        if(len(fronteira) == 0):
+            return None
+        v = fronteira.pop(0)
+        if(isObjective(v)):
+            return path(v)
+        if(notExplored(v.estado, explorados)):
+            explorados.add(v.estado)
+            
+            neighborns = expande(v)
+            for neighborn in neighborns:
+                if notExplored(neighborn.estado, explorados):
+                    #print(type(neighborn))
+                    fronteira.append(neighborn)
+
 
 #opcional,extra
 def dfs(estado:str)->list[str]:
@@ -131,7 +362,27 @@ def dfs(estado:str)->list[str]:
     :return:
     """
     # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    initial = Nodo(estado, NULL, NULL, 0)
+
+    explorados = set()
+    fronteira = []
+    fronteira.append(initial)
+    while(True):
+        
+        if(len(fronteira) == 0):
+            return None
+        v = fronteira.pop(-1)
+        if(isObjective(v)):
+            return path(v)
+        if(notExplored(v.estado, explorados)):
+            explorados.add(v.estado)
+            
+            neighborns = expande(v)
+            for neighborn in neighborns:
+                if notExplored(neighborn.estado, explorados):
+                    #print(type(neighborn))
+                    fronteira.append(neighborn)
+
 
 #opcional,extra
 def astar_new_heuristic(estado:str)->list[str]:
@@ -145,3 +396,10 @@ def astar_new_heuristic(estado:str)->list[str]:
     """
     # substituir a linha abaixo pelo seu codigo
     raise NotImplementedError
+
+#print("start")
+#initial_State = "12_573486"#"1235764_8"
+#print(astar_hamming(initial_State))
+#print(astar_manhattan(initial_State))
+#print(bfs(initial_State))
+#print(dfs(initial_State))
